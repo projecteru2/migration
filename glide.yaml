@@ -1,0 +1,25 @@
+package: github.com/projecteru2/migration
+import:
+- package: github.com/codegangsta/cli
+- package: github.com/coreos/etcd
+  subpackages:
+  - client
+  - clientv3
+- package: github.com/docker/docker
+  subpackages:
+  - client
+- package: github.com/docker/go-connections
+  subpackages:
+  - tlsconfig
+- package: github.com/projecteru2/core
+  subpackages:
+  - lock
+  - lock/etcdlock
+  - metrics
+  - scheduler
+  - store/etcdv3
+  - types
+  - utils
+  - versioninfo
+- package: github.com/sanity-io/litter
+- package: github.com/sirupsen/logrus

@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/projecteru2/core/migration/etcd"
 	"github.com/projecteru2/core/store/etcdv3"
 	"github.com/projecteru2/core/types"
 	"github.com/projecteru2/core/utils"
 	"github.com/projecteru2/core/versioninfo"
+	"github.com/projecteru2/migration/etcd"
 	"github.com/sanity-io/litter"
 	log "github.com/sirupsen/logrus"
 )
