@@ -40,29 +40,39 @@ func serve() {
 	migration(config, oldStore, newStore)
 }
 
-func migration(config types.Config, old *etcdstore.Krypton, new *etcdv3.Mercury) {
+func migration(config types.Config, src *etcdstore.Krypton, dst *etcdv3.Mercury) {
 	ctx := context.Background()
-	pods, _ := old.GetAllPods(ctx)
+	pods, _ := src.GetAllPods(ctx)
 	litter.Dump(pods)
 	for _, pod := range pods {
-		p, _ := new.AddPod(ctx, pod.Name, pod.Favor, pod.Desc) // TODO error process
+		p, _ := dst.AddPod(ctx, pod.Name, pod.Favor, pod.Desc) // TODO error process
 		litter.Dump(p)
-		nodes, _ := old.GetNodesByPod(ctx, pod.Name)
+		nodes, _ := src.GetNodesByPod(ctx, pod.Name)
 		for _, node := range nodes {
-			ca, certs, key := old.GetNodeCerts(ctx, p.Name, node.Name)
-			n, err := new.AddNode(ctx, node.Name, node.Endpoint, p.Name, ca, certs, key, len(node.CPU), config.Scheduler.ShareBase, node.MemCap, node.Labels)
+			ca, certs, key := src.GetNodeCerts(ctx, p.Name, node.Name)
+			// force clean etcdv3 node info
+			dst.DeleteNode(ctx, node)
+			// revert containers usage
+			containers, _ := src.ListNodeContainers(ctx, node.Name)
+			memCap := node.MemCap
+			for _, container := range containers {
+				memCap += container.Memory
+			}
+			// add node in etcdv3
+			n, err := dst.AddNode(ctx, node.Name, node.Endpoint, p.Name, ca, certs, key, len(node.CPU), config.Scheduler.ShareBase, memCap, node.Labels)
 			if err != nil {
 				continue
 			}
 			// should update node resource
 			n.CPU = node.CPU
-			new.UpdateNode(ctx, n)
+			n.MemCap = node.MemCap
+			dst.UpdateNode(ctx, n)
 		}
 	}
 
-	containers, _ := old.ListContainers(ctx, "", "", "")
+	containers, _ := src.ListContainers(ctx, "", "", "")
 	for _, container := range containers {
-		new.AddContainer(ctx, container)
+		dst.AddContainer(ctx, container)
 	}
 	log.Info("Done")
 }
