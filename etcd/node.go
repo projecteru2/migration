@@ -311,7 +311,7 @@ func (k *Krypton) UpdateNodeResource(ctx context.Context, podname, nodename stri
 	return err
 }
 
-func (k *Krypton) makeDockerClient(ctx context.Context, podname, nodename, endpoint string, force bool) (*engineapi.Client, error) {
+func (k *Krypton) makeDockerClient(ctx context.Context, podname, nodename, endpoint string, force bool) (engineapi.APIClient, error) {
 	// if unix just connect it
 	if strings.HasPrefix(endpoint, nodeSockPrefixKey) {
 		return makeRawClient(endpoint, k.config.Docker.APIVersion)
@@ -323,7 +323,7 @@ func (k *Krypton) makeDockerClient(ctx context.Context, podname, nodename, endpo
 	}
 
 	// try get client, if nil, create a new one
-	var client *engineapi.Client
+	var client engineapi.APIClient
 	var cliErr error
 	client = _cache.Get(host)
 	if client == nil || force {

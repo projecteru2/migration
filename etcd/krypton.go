@@ -75,4 +75,4 @@ func (k *Krypton) CreateLock(key string, ttl int) (lock.DistributedLock, error) 
 	return mutex, err
 }
 
-var _cache = &utils.Cache{Clients: make(map[string]*engineapi.Client)}
+var _cache = &utils.Cache{Clients: make(map[string]engineapi.APIClient)}
